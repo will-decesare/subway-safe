@@ -1,18 +1,4 @@
-import duckdb
-import os
-
-db_name = 'collisions'
-schema_name = 'raw'
-table_name = 'Collisions_20250205'
-
-def start_db():
-    print('Starting database connection.')
-    conn = duckdb.connect(f'{db_name}.db')
-    return conn
-
-def close_db(conn):
-    print('Ending database connection.')
-    conn.close()
+from dependencies import start_db, close_db, execute_query
 
 # start analysis
 conn = start_db()
@@ -21,10 +7,13 @@ conn = start_db()
 # harlequin "/Users/willdecesare/Documents/GitHub/subway-safe/subway.db"
 query = """
 
-
 create or replace table analytics.fct_felonies as (
-select
-    Month as date_month
+    select
+        make_date(
+            extract('year' from Month),
+            extract('day' from Month),
+            extract('month' from Month)
+        ) as date_month
     , 'Subway' as mode
     , sum("Felony Count") as felonies
 from "raw"."MTAMajorFelonies_20250210"
@@ -189,10 +178,9 @@ create or replace table analytics.fct_safety_incidents as (
 
 );
 
-
 """
 
-
+execute_query(conn, query)
 
 # stop analysis
 close_db(conn)
