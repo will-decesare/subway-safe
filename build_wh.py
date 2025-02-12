@@ -2,8 +2,18 @@ import duckdb
 import os
 import time
 
-db_name = 'collisions'
-file_path = '/Users/willdecesare/Documents/GitHub/subway-safe/Collisions_20250205.csv'
+"""
+This script:
+1. Builds a db called collisions
+2. Loads the table Collisions_20250205 in collisions
+"""
+
+db_name = 'subway'
+collisions_path = '/Users/willdecesare/Documents/GitHub/subway-safe/Collisions_20250205.csv'
+felonies_path = '/Users/willdecesare/Documents/GitHub/subway-safe/MTAMajorFelonies_20250210.csv'
+ridership_path = '/Users/willdecesare/Documents/GitHub/subway-safe/MTADailyRidership_20250210.csv'
+nyct_collisions_path = '/Users/willdecesare/Documents/GitHub/subway-safe/MTANYCTSafetyData_20250211.csv'
+
 
 def start_db():
     print('Starting database connection.')
@@ -17,17 +27,15 @@ def close_db(conn):
 def setup_db(conn):
     print('Starting database setup.')
     conn.execute("CREATE SCHEMA IF NOT EXISTS raw")
+    conn.execute("CREATE SCHEMA IF NOT EXISTS analytics")
     return conn
 
 def load_data(conn, file_path):
-
     def create_table_name(file_path):
         table_name = os.path.splitext(os.path.basename(file_path))[0]
         return table_name
-
     table_name = create_table_name(file_path)
     query = f"CREATE OR REPLACE TABLE raw.{table_name} AS SELECT * FROM read_csv('{file_path}')"
-    
     try:
         conn.execute(query)
         print(f"Created table: {table_name}")
@@ -40,7 +48,10 @@ def main():
 
     conn = start_db()
     setup_db(conn)
-    load_data(conn, file_path)
+    load_data(conn, collisions_path)
+    load_data(conn, felonies_path)
+    load_data(conn, ridership_path)
+    load_data(conn, nyct_collisions_path)
     close_db(conn)
 
     end_time = time.time()
