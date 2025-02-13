@@ -1,10 +1,13 @@
 from dependencies import start_db, close_db, execute_query
 
-# start analysis
+"""
+This script transforms raw data into usable models for downstream consumption. 
+"""
+
+# initialize db connection
 conn = start_db()
 
-# analysis goes here
-# harlequin "/Users/willdecesare/Documents/GitHub/subway-safe/subway.db"
+# model build query
 query = """
 
 create or replace table analytics.fct_felonies as (
@@ -198,7 +201,8 @@ create or replace table analytics.fct_safety_incidents as (
 
 """
 
+# run transformation
 execute_query(conn, query)
 
-# stop analysis
+# close db connection
 close_db(conn)
