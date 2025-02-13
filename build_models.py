@@ -47,13 +47,30 @@ create or replace table analytics.fct_ridership as
         group by 1,2
     )
 
+    , base_aggregated_yearly_sum as (
+        select
+            extract(year from date_month) as date_year
+            , sum(trips) as trips_year
+        from base_aggregated
+        group by 1
+    )
+
+    , base_aggregated_distribution as (
+        select
+            a.date_month
+            , b.trips_year
+            , (a.trips / b.trips_year) as monthly_distribution
+            , (2*(1/12) - (a.trips / b.trips_year)) as inverse_monthly_distribution
+        from base_aggregated a
+        left join base_aggregated_yearly_sum b on extract(year from a.date_month) = b.date_year
+    )
+
     , new_modes as (
         SELECT 
             date_month
             , unnest(['Pedestrian', 'Car', 'Bike']) as mode
             , 0 as trips
         FROM base_aggregated
-    
     )
 
     , update_ridership as (
@@ -61,13 +78,13 @@ create or replace table analytics.fct_ridership as
             new_modes.date_month
             , new_modes.mode
             , case 
-                when new_modes.mode = 'Pedestrian' then base_aggregated.trips * (45/17)
-                when new_modes.mode = 'Car' then base_aggregated.trips * (34/17)
-                when new_modes.mode = 'Bike' then base_aggregated.trips * (3/17)
+                when new_modes.mode = 'Pedestrian' then b.trips_year * (45/17) * b.inverse_monthly_distribution
+                when new_modes.mode = 'Car' then b.trips_year * (34/17) * b.monthly_distribution
+                when new_modes.mode = 'Bike' then b.trips_year * (3/17) * b.inverse_monthly_distribution
                 else null 
             end as riders
         from new_modes
-        left join base_aggregated on new_modes.date_month = base_aggregated.date_month
+        left join base_aggregated_distribution b on new_modes.date_month = b.date_month
     )
 
     , unioned as (
