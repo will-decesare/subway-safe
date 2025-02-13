@@ -153,8 +153,23 @@ with nyct_collisions as (
 
 )
 
-select * from nyct_adjusted
-order by 1,2
+, missing_december as (
+    select 
+        '2024-12-01'::date as date_month
+        , mode
+        , injuries
+    from nyct_adjusted
+    where date_month = '2024-11-01' and mode in ('Bus', 'Subway')
+)
+
+, union_december as (
+    select * from nyct_adjusted
+    union all
+    select * from missing_december
+    order by 1, 2
+)
+
+select * from union_december
 
 );
 
