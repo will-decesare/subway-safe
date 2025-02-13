@@ -1,4 +1,4 @@
-db_name = 'subway'
+db_path = '/Users/willdecesare/Documents/GitHub/subway-safe/subway.db'
 collisions_path = '/Users/willdecesare/Documents/GitHub/subway-safe/Collisions_20250205.csv'
 felonies_path = '/Users/willdecesare/Documents/GitHub/subway-safe/MTAMajorFelonies_20250210.csv'
 ridership_path = '/Users/willdecesare/Documents/GitHub/subway-safe/MTADailyRidership_20250210.csv'

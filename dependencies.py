@@ -6,11 +6,11 @@ import plotly.express as px
 import pandas as pd
 from datetime import datetime
 
-from config import db_name
+from config import db_path
 
 def start_db():
-    print('Starting database connection.')
-    conn = duckdb.connect(f'/Users/willdecesare/Documents/GitHub/subway-safe/subway.db')
+    print('Connected to database.')
+    conn = duckdb.connect(db_path)
     return conn
 
 def close_db(conn):

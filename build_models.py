@@ -17,10 +17,11 @@ create or replace table analytics.fct_felonies as (
     , 'Subway' as mode
     , sum("Felony Count") as felonies
 from "raw"."MTAMajorFelonies_20250210"
-where Month >= '2024-01-01'
+where Month >= '2023-01-01'
     and Month < '2025-01-01'
     and Agency = 'NYCT'
 group by 1,2
+order by 1,2
 );
 
 create or replace table analytics.fct_ridership as
@@ -31,7 +32,7 @@ create or replace table analytics.fct_ridership as
             , Mode as mode
             , sum(Count) as trips
         FROM "raw"."MTADailyRidership_20250210"
-        where Date >= '2024-01-01'
+        where Date >= '2023-01-01'
             and Date < '2025-01-01'
             and Mode in ('Subway', 'Bus')
         group by 1,2
@@ -97,7 +98,7 @@ with nyct_collisions as (
         , Value as injuries
     from raw.MTANYCTSafetyData_20250211
     where Metric in ('Bus Customer Accidents per million customers', 'Subway Customer Accidents') -- both metrics are actually normalized to per million
-        and Month >= '2024-01-01'
+        and Month >= '2023-01-01'
         and Month < '2025-01-01'
 )
 
@@ -111,7 +112,7 @@ with nyct_collisions as (
         end as mode
         , count(unique_id) as injuries
     from "raw"."Collisions_20250205" 
-    where CRASH_DATE >= '2024-01-01' 
+    where CRASH_DATE >= '2023-01-01' 
         and CRASH_DATE < '2025-01-01' 
         and PERSON_INJURY in ('Injured', 'Killed')
         and PERSON_TYPE in ('Occupant', 'Bicyclist', 'Pedestrian')
@@ -153,6 +154,7 @@ with nyct_collisions as (
 )
 
 select * from nyct_adjusted
+order by 1,2
 
 );
 
@@ -162,10 +164,10 @@ create or replace table analytics.fct_safety_incidents as (
         select
             a.date_month
             , a.mode
-            , a.trips
-            , coalesce(b.injuries, 0) as injuries
-            , coalesce(c.felonies, 0) as felonies
-            , coalesce(b.injuries, 0) + coalesce(c.felonies, 0) as safety_incidents
+            , round(a.trips, 0) as trips
+            , round(coalesce(b.injuries, 0), 0) as injuries
+            , round(coalesce(c.felonies, 0), 0) as felonies
+            , round(coalesce(b.injuries, 0) + coalesce(c.felonies, 0), 0) as safety_incidents
         from analytics.fct_ridership a
         left join analytics.fct_collisions b on a.date_month = b.date_month and a.mode = b.mode
         left join analytics.fct_felonies c on a.date_month = c.date_month and a.mode = c.mode
@@ -175,6 +177,7 @@ create or replace table analytics.fct_safety_incidents as (
         base.*
         , round(base.safety_incidents * 1000000 / base.trips, 2) as safety_incidents_per_million_trips
     from base
+    order by 1,2
 
 );
 
