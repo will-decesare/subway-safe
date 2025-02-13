@@ -3,8 +3,8 @@ from config import collisions_path, felonies_path, ridership_path, nyct_collisio
 
 """
 This script:
-1. Builds a db called collisions
-2. Loads the table Collisions_20250205 in collisions
+1. Sets up a duckdb database called subway.
+2. Loads a few raw data files into the database.
 """
 
 def setup_db(conn):
