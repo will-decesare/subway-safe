@@ -1,4 +1,4 @@
 # NYC Subway Safe Project
 
-See upcoming newsletter - will be linked soon!
+You can find the background for this project [here](https://courtstreetdata.beehiiv.com/p/is-riding-the-subway-safe).
  
